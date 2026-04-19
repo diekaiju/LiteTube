@@ -49,6 +49,7 @@ import org.schabi.newpipe.fragments.list.comments.CommentRepliesFragment;
 import org.schabi.newpipe.fragments.list.kiosk.KioskFragment;
 import org.schabi.newpipe.fragments.list.playlist.PlaylistFragment;
 import org.schabi.newpipe.fragments.list.search.SearchFragment;
+import org.schabi.newpipe.fragments.YoutubeWebViewFragment;
 import org.schabi.newpipe.local.bookmark.BookmarkFragment;
 import org.schabi.newpipe.local.feed.FeedFragment;
 import org.schabi.newpipe.local.history.StatisticsPlaylistFragment;
@@ -599,6 +600,13 @@ public final class NavigationHelper {
     public static void openStatisticFragment(final FragmentManager fragmentManager) {
         defaultTransaction(fragmentManager)
                 .replace(R.id.fragment_holder, new StatisticsPlaylistFragment())
+                .addToBackStack(null)
+                .commit();
+    }
+
+    public static void openYoutubeWebViewFragment(final FragmentManager fragmentManager) {
+        defaultTransaction(fragmentManager)
+                .replace(R.id.fragment_holder, new YoutubeWebViewFragment())
                 .addToBackStack(null)
                 .commit();
     }
