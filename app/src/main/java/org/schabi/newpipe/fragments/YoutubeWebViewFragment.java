@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
@@ -15,6 +18,7 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 
 import org.schabi.newpipe.BaseFragment;
 import org.schabi.newpipe.MainActivity;
@@ -26,6 +30,12 @@ import org.schabi.newpipe.util.NavigationHelper;
 public class YoutubeWebViewFragment extends BaseFragment implements BackPressable {
 
     private WebView webView;
+
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @Nullable
     @Override
@@ -79,9 +89,19 @@ public class YoutubeWebViewFragment extends BaseFragment implements BackPressabl
 
         if (savedInstanceState == null) {
             webView.loadUrl("https://m.youtube.com/");
+        } else {
+            webView.restoreState(savedInstanceState);
         }
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull final Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (webView != null) {
+            webView.saveState(outState);
+        }
     }
 
     private void injectClickInterceptor() {
@@ -92,10 +112,11 @@ public class YoutubeWebViewFragment extends BaseFragment implements BackPressabl
                 + "    var isVid = link.href.indexOf('/watch?') !== -1 "
                 + "      || link.href.indexOf('/shorts/') !== -1 "
                 + "      || link.href.indexOf('youtu.be/') !== -1; "
-                + "    if (isVid) { "
+                + "    var isPlaylist = link.href.indexOf('/playlist?') !== -1; "
+                + "    if (isVid || isPlaylist) { "
                 + "      e.preventDefault(); "
                 + "      e.stopPropagation(); "
-                + "      window.NewPipeApp.onVideoClicked(link.href); "
+                + "      window.NewPipeApp.onClicked(link.href, isVid); "
                 + "    } "
                 + "  } "
                 + "}, true); "
@@ -106,25 +127,42 @@ public class YoutubeWebViewFragment extends BaseFragment implements BackPressabl
 
     private final class WebAppInterface {
         @JavascriptInterface
-        public void onVideoClicked(final String url) {
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
+        public void onClicked(final String url, final boolean isVideo) {
+            final FragmentActivity activity = getActivity();
+            if (activity != null) {
+                activity.runOnUiThread(() -> {
+                    if (!isAdded()) {
+                        return;
+                    }
                     try {
-                        Log.d("YoutubeWebView", "Intercepted via JS: " + url);
+                        Log.d("YoutubeWebView", "Intercepted: " + url);
 
-                        // Pause any background playback
                         webView.evaluateJavascript(
-                                "document.getElementsByTagName('video')[0].pause();",
-                                null);
+                                "(function(){var v=document.querySelector('video');"
+                                        + "if(v)v.pause();})()", null);
 
-                        final StreamingService service = NewPipe.getServiceByUrl(url);
+                        String finalUrl = url;
+                        if (url.contains("youtube.com") || url.contains("youtu.be")) {
+                            finalUrl = url.replace("m.youtube.com", "www.youtube.com")
+                                    .replace("mobile.youtube.com", "www.youtube.com");
+                        }
 
-                        NavigationHelper.openVideoDetailFragment(requireContext(),
-                                requireActivity().getSupportFragmentManager(),
-                                service.getServiceId(), url, "", null, false);
+                        final StreamingService service = NewPipe.getServiceByUrl(finalUrl);
+
+                        if (isVideo) {
+                            NavigationHelper.openVideoDetailFragment(activity,
+                                    activity.getSupportFragmentManager(),
+                                    service.getServiceId(), finalUrl, "", null, false);
+                        } else {
+                            NavigationHelper.openPlaylistFragment(
+                                    activity.getSupportFragmentManager(),
+                                    service.getServiceId(), finalUrl, "");
+                        }
 
                     } catch (final Exception e) {
-                        Log.e("YoutubeWebView", "Failed to open intercepted link: " + url, e);
+                        Log.e("YoutubeWebView", "Native open failed, falling back: " + url,
+                                e);
+                        webView.loadUrl(url);
                     }
                 });
             }
@@ -138,6 +176,35 @@ public class YoutubeWebViewFragment extends BaseFragment implements BackPressabl
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).getSupportActionBar().setTitle("YouTube Web");
         }
+        if (webView != null) {
+            webView.onResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (webView != null) {
+            webView.onPause();
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull final Menu menu,
+                                    @NonNull final MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_youtube_webview, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
+        if (item.getItemId() == R.id.menu_item_refresh) {
+            if (webView != null) {
+                webView.reload();
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

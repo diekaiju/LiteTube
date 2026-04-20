@@ -124,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int ITEM_ID_BOOKMARKS = -3;
     private static final int ITEM_ID_DOWNLOADS = -4;
     private static final int ITEM_ID_HISTORY = -5;
-    private static final int ITEM_ID_YOUTUBE_WEB = -6;
     private static final int ITEM_ID_SETTINGS = 0;
     private static final int ITEM_ID_DONATION = 1;
     private static final int ITEM_ID_ABOUT = 2;
@@ -290,9 +289,6 @@ public class MainActivity extends AppCompatActivity {
         drawerLayoutBinding.navigation.getMenu()
                 .add(R.id.menu_tabs_group, ITEM_ID_HISTORY, ORDER, R.string.action_history)
                 .setIcon(R.drawable.ic_history);
-        drawerLayoutBinding.navigation.getMenu()
-                .add(R.id.menu_tabs_group, ITEM_ID_YOUTUBE_WEB, ORDER, "YouTube Web")
-                .setIcon(R.drawable.ic_public);
 
         //Kiosks
         final int currentServiceId = ServiceHelper.getSelectedServiceId(this);
@@ -369,9 +365,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case ITEM_ID_HISTORY:
                 NavigationHelper.openStatisticFragment(getSupportFragmentManager());
-                break;
-            case ITEM_ID_YOUTUBE_WEB:
-                NavigationHelper.openYoutubeWebViewFragment(getSupportFragmentManager());
                 break;
         }
     }
