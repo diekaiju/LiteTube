@@ -47,7 +47,7 @@ configure<ApplicationExtension> {
 
     defaultConfig {
         applicationId = NEWPIPE_APPLICATION_ID_OLD
-        resValue("string", "app_name", "NewPipe")
+        resValue("string", "app_name", "LiteTube")
         minSdk {
             version = release(NEWPIPE_VERSION_SDK_MIN)
         }
@@ -70,17 +70,17 @@ configure<ApplicationExtension> {
             // suffix the app id and the app name with git branch name
             if (normalizedWorkingBranch.isEmpty() || workingBranch in defaultBranches) {
                 applicationIdSuffix = ".debug"
-                resValue("string", "app_name", "NewPipe Debug")
+                resValue("string", "app_name", "LiteTube Debug")
             } else {
                 applicationIdSuffix = ".debug.$normalizedWorkingBranch"
-                resValue("string", "app_name", "NewPipe $workingBranch")
+                resValue("string", "app_name", "LiteTube $workingBranch")
             }
         }
 
         release {
             System.getProperty("packageSuffix")?.let { suffix ->
                 applicationIdSuffix = suffix
-                resValue("string", "app_name", "NewPipe $suffix")
+                resValue("string", "app_name", "LiteTube $suffix")
             }
             isMinifyEnabled = true
             isShrinkResources = true

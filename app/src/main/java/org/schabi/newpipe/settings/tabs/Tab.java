@@ -19,6 +19,7 @@ import org.schabi.newpipe.extractor.NewPipe;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import org.schabi.newpipe.fragments.BlankFragment;
+import org.schabi.newpipe.fragments.YoutubeWebViewFragment;
 import org.schabi.newpipe.fragments.list.channel.ChannelFragment;
 import org.schabi.newpipe.fragments.list.kiosk.DefaultKioskFragment;
 import org.schabi.newpipe.fragments.list.kiosk.KioskFragment;
@@ -165,7 +166,8 @@ public abstract class Tab {
         KIOSK(new KioskTab()),
         CHANNEL(new ChannelTab()),
         PLAYLIST(new PlaylistTab()),
-        FEEDGROUP(new FeedGroupTab());
+        FEEDGROUP(new FeedGroupTab()),
+        YOUTUBE_WEB(new YoutubeWebTab());
 
         private final Tab tab;
 
@@ -742,6 +744,30 @@ public abstract class Tab {
 
         public int getIconId() {
             return iconId;
+        }
+    }
+
+    public static class YoutubeWebTab extends Tab {
+        public static final int ID = 10;
+
+        @Override
+        public int getTabId() {
+            return ID;
+        }
+
+        @Override
+        public String getTabName(final Context context) {
+            return context.getString(R.string.youtube_web);
+        }
+
+        @Override
+        public int getTabIconRes(final Context context) {
+            return R.drawable.ic_public;
+        }
+
+        @Override
+        public YoutubeWebViewFragment getFragment(final Context context) {
+            return new YoutubeWebViewFragment();
         }
     }
 }
