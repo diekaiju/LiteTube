@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/new_pipe_icon_5.png" width="150"></p> 
+<p align="center"><img src="screenshots\Screenshot 2026-04-20 123334.png" width="150"></p> 
 <h2 align="center"><b>LiteTube</b></h2>
 <h4 align="center">A stable, lightweight, and privacy-focused streaming front-end for Android.</h4>
 
