@@ -1,6 +1,6 @@
 <p align="center"><img src="screenshots\Screenshot 2026-04-20 123334.png" width="150"></p> 
 <h2 align="center"><b>LiteTube</b></h2>
-<h4 align="center">A stable, lightweight, and privacy-focused streaming front-end for Android.</h4>
+<h4 align="center">Fork of Newpipe, A libre lightweight streaming front-end for Android , with youtube login</h4>
 
 <p align="center">
 <a href="https://github.com/diekaiju/LiteTube/releases" alt="GitHub LiteTube releases"><img src="https://img.shields.io/github/release/diekaiju/LiteTube.svg" ></a>
