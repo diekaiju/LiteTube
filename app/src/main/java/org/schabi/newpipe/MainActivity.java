@@ -241,14 +241,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "App moved to background");
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (!isChangingConfigurations()) {
-            InfoCache.getInstance().clearCache();
-            deleteCache(this);
-        }
-    }
+
 
     private void deleteCache(final Context context) {
         try {
@@ -550,6 +543,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         if (!isChangingConfigurations()) {
             StateSaver.clearStateFiles();
+            InfoCache.getInstance().clearCache();
+            deleteCache(this);
         }
         if (broadcastReceiver != null) {
             unregisterReceiver(broadcastReceiver);
