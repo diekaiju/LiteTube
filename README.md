@@ -122,6 +122,12 @@ Whether you have ideas, translations, design changes, code cleaning, or even maj
 ## Donate
 If you like LiteTube, you're welcome to send a donation. LiteTube is developed by volunteers spending their free time bringing you the best user experience.
 
+## Buy me a coffee
+
+If you want to support the developer:
+
+ [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/diekaiju)
+
 ## Privacy Policy
 
 The LiteTube project aims to provide a private, anonymous experience for using web-based media services. Therefore, the app does not collect any data without your consent. LiteTube's privacy policy explains in detail what data is sent and stored when you send a crash report.
