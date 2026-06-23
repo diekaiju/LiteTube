@@ -85,6 +85,7 @@ import org.schabi.newpipe.settings.UpdateSettingsFragment;
 import org.schabi.newpipe.settings.migration.MigrationManager;
 import org.schabi.newpipe.util.Constants;
 import org.schabi.newpipe.util.DeviceUtils;
+import org.schabi.newpipe.util.InfoCache;
 import org.schabi.newpipe.util.KioskTranslator;
 import org.schabi.newpipe.util.Localization;
 import org.schabi.newpipe.util.NavigationHelper;
@@ -98,6 +99,7 @@ import org.schabi.newpipe.util.ThemeHelper;
 import org.schabi.newpipe.util.external_communication.ShareUtils;
 import org.schabi.newpipe.views.FocusOverlayView;
 
+import java.io.File;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -237,6 +239,47 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         sharedPrefEditor.putBoolean(KEY_IS_IN_BACKGROUND, true).apply();
         Log.d(TAG, "App moved to background");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!isChangingConfigurations()) {
+            InfoCache.getInstance().clearCache();
+            deleteCache(this);
+        }
+    }
+
+    private void deleteCache(final Context context) {
+        try {
+            final File cacheDir = context.getCacheDir();
+            deleteDir(cacheDir);
+            final File externalCacheDir = context.getExternalCacheDir();
+            if (externalCacheDir != null) {
+                deleteDir(externalCacheDir);
+            }
+        } catch (final Exception e) {
+            Log.e(TAG, "Failed to delete cache directory", e);
+        }
+    }
+
+    private boolean deleteDir(final File dir) {
+        if (dir != null && dir.isDirectory()) {
+            final String[] children = dir.list();
+            if (children != null) {
+                for (final String child : children) {
+                    final boolean success = deleteDir(new File(dir, child));
+                    if (!success) {
+                        return false;
+                    }
+                }
+            }
+            return dir.delete();
+        } else if (dir != null && dir.isFile()) {
+            return dir.delete();
+        } else {
+            return false;
+        }
     }
     private void setupDrawer() throws ExtractionException {
         addDrawerMenuForCurrentService();

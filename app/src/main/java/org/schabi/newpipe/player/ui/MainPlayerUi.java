@@ -894,7 +894,9 @@ public final class MainPlayerUi extends VideoPlayerUi implements View.OnLayoutCh
     @Override
     public void onVideoSizeChanged(@NonNull final VideoSize videoSize) {
         super.onVideoSizeChanged(videoSize);
-        isVerticalVideo = videoSize.width < videoSize.height;
+        final String url = player.getVideoUrl();
+        final boolean isShort = url != null && url.contains("/shorts/");
+        isVerticalVideo = !isShort && (videoSize.width < videoSize.height);
 
         if (globalScreenOrientationLocked(context)
                 && isFullscreen

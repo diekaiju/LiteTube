@@ -1,5 +1,6 @@
 package org.schabi.newpipe.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,12 +20,15 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+import androidx.preference.PreferenceManager;
 
 import org.schabi.newpipe.BaseFragment;
 import org.schabi.newpipe.MainActivity;
 import org.schabi.newpipe.R;
 import org.schabi.newpipe.extractor.NewPipe;
 import org.schabi.newpipe.extractor.StreamingService;
+import org.schabi.newpipe.extractor.stream.StreamInfoItem;
+import org.schabi.newpipe.info_list.dialog.InfoItemDialog;
 import org.schabi.newpipe.util.NavigationHelper;
 
 public class YoutubeWebViewFragment extends BaseFragment implements BackPressable {
@@ -104,8 +108,47 @@ public class YoutubeWebViewFragment extends BaseFragment implements BackPressabl
         }
     }
 
+    private void checkAndSyncHistoryToYouTube(final Context context, final String url) {
+        final boolean isSyncEnabled = PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getBoolean(context.getString(R.string.enable_webview_history_sync_key), false);
+
+        if (!isSyncEnabled) {
+            return;
+        }
+
+        Log.d("YoutubeWebView", "Syncing watch history to YouTube for URL: " + url);
+
+        final WebView bgWebView = new WebView(context.getApplicationContext());
+        bgWebView.getSettings().setJavaScriptEnabled(true);
+        bgWebView.getSettings().setDomStorageEnabled(true);
+
+        bgWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(final WebView view, final String pageUrl) {
+                super.onPageFinished(view, pageUrl);
+                Log.d("YoutubeWebView", "Sync WebView loaded: " + pageUrl
+                        + ". Keeping alive for 5 seconds.");
+
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    try {
+                        bgWebView.stopLoading();
+                        bgWebView.destroy();
+                        Log.d("YoutubeWebView", "Sync WebView destroyed for: " + pageUrl);
+                    } catch (final Exception e) {
+                        Log.e("YoutubeWebView", "Error destroying sync WebView", e);
+                    }
+                }, 5000);
+            }
+        });
+
+        bgWebView.loadUrl(url);
+    }
+
     private void injectClickInterceptor() {
         final String js = "javascript:(function() { "
+                + "if (window.clickInterceptorInjected) return; "
+                + "window.clickInterceptorInjected = true; "
                 + "document.addEventListener('click', function(e) { "
                 + "  var link = e.target.closest('a'); "
                 + "  if (link && link.href) { "
@@ -117,6 +160,19 @@ public class YoutubeWebViewFragment extends BaseFragment implements BackPressabl
                 + "      e.preventDefault(); "
                 + "      e.stopPropagation(); "
                 + "      window.NewPipeApp.onClicked(link.href, isVid); "
+                + "    } "
+                + "  } "
+                + "}, true); "
+                + "document.addEventListener('contextmenu', function(e) { "
+                + "  var link = e.target.closest('a'); "
+                + "  if (link && link.href) { "
+                + "    var isVid = link.href.indexOf('/watch?') !== -1 "
+                + "      || link.href.indexOf('/shorts/') !== -1 "
+                + "      || link.href.indexOf('youtu.be/') !== -1; "
+                + "    if (isVid) { "
+                + "      e.preventDefault(); "
+                + "      e.stopPropagation(); "
+                + "      window.NewPipeApp.onLongPressed(link.href, link.innerText || ''); "
                 + "    } "
                 + "  } "
                 + "}, true); "
@@ -150,6 +206,8 @@ public class YoutubeWebViewFragment extends BaseFragment implements BackPressabl
                         final StreamingService service = NewPipe.getServiceByUrl(finalUrl);
 
                         if (isVideo) {
+                            checkAndSyncHistoryToYouTube(activity, url);
+
                             NavigationHelper.openVideoDetailFragment(activity,
                                     activity.getSupportFragmentManager(),
                                     service.getServiceId(), finalUrl, "", null, false);
@@ -163,6 +221,54 @@ public class YoutubeWebViewFragment extends BaseFragment implements BackPressabl
                         Log.e("YoutubeWebView", "Native open failed, falling back: " + url,
                                 e);
                         webView.loadUrl(url);
+                    }
+                });
+            }
+        }
+
+        @JavascriptInterface
+        public void onLongPressed(final String url, final String title) {
+            final FragmentActivity activity = getActivity();
+            if (activity != null) {
+                activity.runOnUiThread(() -> {
+                    if (!isAdded()) {
+                        return;
+                    }
+                    try {
+                        Log.d("YoutubeWebView", "Long pressed: " + url + ", title: " + title);
+
+                        String finalUrl = url;
+                        if (url.contains("youtube.com") || url.contains("youtu.be")) {
+                            finalUrl = url.replace("m.youtube.com", "www.youtube.com")
+                                    .replace("mobile.youtube.com", "www.youtube.com");
+                        }
+
+                        final StreamingService service = NewPipe.getServiceByUrl(finalUrl);
+
+                        String cleanTitle = title;
+                        if (cleanTitle != null) {
+                            cleanTitle = cleanTitle.split("\n")[0].trim();
+                        }
+                        if (cleanTitle == null || cleanTitle.isEmpty()) {
+                            cleanTitle = "YouTube Video";
+                        }
+
+                        final StreamInfoItem item = new StreamInfoItem(
+                                service.getServiceId(),
+                                finalUrl,
+                                cleanTitle,
+                                org.schabi.newpipe.extractor.stream.StreamType.VIDEO_STREAM
+                        );
+
+                        new InfoItemDialog.Builder(
+                                activity,
+                                getContext(),
+                                YoutubeWebViewFragment.this,
+                                item
+                        ).create().show();
+
+                    } catch (final Exception e) {
+                        Log.e("YoutubeWebView", "Long press handling failed", e);
                     }
                 });
             }

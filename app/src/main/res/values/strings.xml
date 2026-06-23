@@ -123,6 +123,8 @@
     <string name="enable_search_history_title">Search history</string>
     <string name="enable_search_history_summary">Store search queries locally</string>
     <string name="enable_watch_history_title">Watch history</string>
+    <string name="enable_webview_history_sync_title">Sync watch history to YouTube</string>
+    <string name="enable_webview_history_sync_summary">Allows YouTube to know what video you are watching (opens loaded videos in a hidden background WebView to register view history on YouTube side).</string>
     <string name="enable_playback_resume_title">Resume playback</string>
     <string name="enable_playback_resume_summary">Restore last playback position</string>
     <string name="enable_playback_state_lists_title">Positions in lists</string>

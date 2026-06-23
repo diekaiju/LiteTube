@@ -129,6 +129,11 @@ class SubscriptionFragment : BaseStateFragment<SubscriptionState>() {
         addMenuItemToSubmenu(importSubMenu, R.string.previous_export) { importExportHelper.onImportPreviousSelected() }
             .setIcon(R.drawable.ic_backup)
 
+        addMenuItemToSubmenu(importSubMenu, "YouTube Account (Cloud)") {
+            YoutubeSubscriptionImportFragment().show(parentFragmentManager, "youtube_import")
+        }
+            .setIcon(R.drawable.ic_backup)
+
         for (service in ServiceList.all()) {
             val subscriptionExtractor = service.subscriptionExtractor ?: continue
 
