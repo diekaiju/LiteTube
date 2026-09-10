@@ -2,6 +2,8 @@
 <h2 align="center"><b>LiteTube</b></h2>
 <h4 align="center">Fork of Newpipe, A libre lightweight streaming front-end for Android , with youtube login</h4>
 
+[![downloads](https://img.shields.io/github/downloads/diekaiju/liteltube/total?logo=github&label=GitHub%20Downloads)](https://github.com/diekaiju/litetube/releases)
+
 <p align="center">
 <a href="https://github.com/diekaiju/LiteTube/releases" alt="GitHub LiteTube releases"><img src="https://img.shields.io/github/release/diekaiju/LiteTube.svg" ></a>
 <a href="https://www.gnu.org/licenses/gpl-3.0" alt="License: GPLv3"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg"></a>
