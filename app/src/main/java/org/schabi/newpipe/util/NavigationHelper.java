@@ -696,6 +696,7 @@ public final class NavigationHelper {
     }
 
     public static void openSettings(final Context context) {
+        // TODO: Replace with "ContextKt.navigateTo(context, Destination.Settings.INSTANCE);" later
         final Intent intent = new Intent(context, SettingsActivity.class);
         context.startActivity(intent);
     }
